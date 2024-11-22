@@ -10,8 +10,11 @@ interface MenuItem {
   price: string;
 }
 
+const globalMenu: { menuItems: MenuItem[] } = {
+  menuItems: [],
+};
+
 const EditMenuScreen = ({ navigation }: { navigation: any }) => {
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [dishName, setDishName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [price, setPrice] = useState<string>("");
@@ -25,11 +28,49 @@ const EditMenuScreen = ({ navigation }: { navigation: any }) => {
     { label: "Refreshments", value: "refreshments" },
   ];
 
-  const handleSaveDish = () => {
+  // Function to add a new dish to the menu
+  const addDishToMenu = (dish: MenuItem) => {
+    globalMenu.menuItems.push(dish);
+  };
+
+  // Function to validate inputs
+  const validateInputs = (): boolean => {
     if (!dishName || !description || !price || !selectedCategory) {
       Alert.alert("Error", "Please fill in all fields.");
-      return;
+      return false;
     }
+    return true;
+  };
+
+  // Function to display all menu items (using a for loop)
+  const displayMenuItems = () => {
+    console.log("Current Menu Items:");
+    for (let i = 0; i < globalMenu.menuItems.length; i++) {
+      console.log(globalMenu.menuItems[i]);
+    }
+  };
+
+  // Function to display menu items using a while loop
+  const displayMenuItemsWhile = () => {
+    console.log("Displaying Menu Items (while loop):");
+    let index = 0;
+    while (index < globalMenu.menuItems.length) {
+      console.log(globalMenu.menuItems[index]);
+      index++;
+    }
+  };
+
+  // Function to display menu item keys (using a for-in loop)
+  const displayMenuKeys = () => {
+    console.log("Keys of Menu Items:");
+    for (const key in globalMenu.menuItems[0] || {}) {
+      console.log(key);
+    }
+  };
+
+  // Handle saving a new dish
+  const handleSaveDish = () => {
+    if (!validateInputs()) return;
 
     const newDish: MenuItem = {
       id: Date.now().toString(),
@@ -39,13 +80,18 @@ const EditMenuScreen = ({ navigation }: { navigation: any }) => {
       price: `R${price}`,
     };
 
-    const updatedMenuItems = [...menuItems, newDish];
-    setMenuItems(updatedMenuItems);
+    // Add the new dish
+    addDishToMenu(newDish);
 
-    // Navigate to ChefMenuScreen and pass menu items
-    navigation.navigate("Chef", { menuItems: updatedMenuItems });
+    // Display the menu using various loops
+    displayMenuItems();
+    displayMenuItemsWhile();
+    displayMenuKeys();
 
-    // Clear input fields
+    // Navigate to ChefMenuScreen
+    navigation.navigate("Chef", { menuItems: globalMenu.menuItems });
+
+    // Clear the inputs
     setDishName("");
     setDescription("");
     setPrice("");
@@ -117,3 +163,4 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
   },
 });
+

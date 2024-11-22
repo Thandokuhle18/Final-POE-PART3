@@ -2,12 +2,48 @@ import { StyleSheet, Text, View, FlatList, Button, Alert } from "react-native";
 import React, { useState, useEffect } from "react";
 import DropDownPicker from "react-native-dropdown-picker";
 
+// Global variable to store menu items
+let globalMenuItems: MenuItem[] = [];
+
 interface MenuItem {
   id: string;
   name: string;
   category: string;
   price: string;
 }
+
+// Function to calculate average price for a category
+const calculateAveragePrice = (category: string): string => {
+  let totalPrice = 0;
+  let count = 0;
+
+  // Use for loop
+  for (let i = 0; i < globalMenuItems.length; i++) {
+    if (globalMenuItems[i].category === category) {
+      const price = parseFloat(globalMenuItems[i].price.replace("R", "")) || 0;
+      totalPrice += price;
+      count++;
+    }
+  }
+
+  return count > 0 ? (totalPrice / count).toFixed(2) : "0";
+};
+
+// Function to filter menu items by category
+const filterMenuItemsByCategory = (category: string): MenuItem[] => {
+  const filteredItems: MenuItem[] = [];
+
+  // Use while loop
+  let index = 0;
+  while (index < globalMenuItems.length) {
+    if (globalMenuItems[index].category === category) {
+      filteredItems.push(globalMenuItems[index]);
+    }
+    index++;
+  }
+
+  return filteredItems;
+};
 
 const ChefMenuScreen = ({ navigation, route }: { navigation: any; route: any }) => {
   const [open, setOpen] = useState<boolean>(false);
@@ -20,27 +56,15 @@ const ChefMenuScreen = ({ navigation, route }: { navigation: any; route: any }) 
   ]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
 
-  // Update menu items when navigating from EditMenuScreen
+  // Update global menu items and local state when navigating from EditMenuScreen
   useEffect(() => {
     if (route.params?.menuItems) {
-      setMenuItems(route.params.menuItems);
+      globalMenuItems = route.params.menuItems; // Update global variable
+      setMenuItems(globalMenuItems);
     }
   }, [route.params?.menuItems]);
 
-  const calculateAveragePrice = (category: string) => {
-    const categoryItems = menuItems.filter((item) => item.category === category);
-    if (categoryItems.length === 0) return 0;
-
-    const total = categoryItems.reduce((sum, item) => {
-      const price = parseFloat(item.price.replace("R", "")) || 0;
-      return sum + price;
-    }, 0);
-    return (total / categoryItems.length).toFixed(2);
-  };
-
-  const filteredMenuItems = menuItems.filter((item) => item.category === selectedCategory);
-
-  const handleRemoveItem = (id: string) => {
+  const handleRemoveItem = (id: string): void => {
     Alert.alert("Confirm Delete", "Are you sure you want to remove this item?", [
       {
         text: "Cancel",
@@ -49,7 +73,8 @@ const ChefMenuScreen = ({ navigation, route }: { navigation: any; route: any }) 
       {
         text: "OK",
         onPress: () => {
-          setMenuItems((prevItems) => prevItems.filter((item) => item.id !== id));
+          globalMenuItems = globalMenuItems.filter((item) => item.id !== id); // Update global variable
+          setMenuItems(globalMenuItems); // Update local state
         },
       },
     ]);
@@ -60,10 +85,16 @@ const ChefMenuScreen = ({ navigation, route }: { navigation: any; route: any }) 
       <Text style={styles.title}>Chef's Menu</Text>
 
       {/* Back Button */}
+      <Button title="Back to First Screen" onPress={() => navigation.goBack()} />
+
+      {/* Edit Menu Button */}
       <Button
-        title="Back"
-        onPress={() => navigation.goBack()}
-        color="#2196F3"
+        title="Edit Menu"
+        onPress={() =>
+          navigation.navigate("EditMenu", {
+            menuItems,
+          })
+        }
       />
 
       {/* Dropdown Picker */}
@@ -87,7 +118,7 @@ const ChefMenuScreen = ({ navigation, route }: { navigation: any; route: any }) 
 
       {/* Menu List */}
       <FlatList
-        data={filteredMenuItems}
+        data={filterMenuItemsByCategory(selectedCategory)} // Use filtered menu items
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.menuItem}>
@@ -96,16 +127,12 @@ const ChefMenuScreen = ({ navigation, route }: { navigation: any; route: any }) 
             <Button title="Remove" onPress={() => handleRemoveItem(item.id)} color="red" />
           </View>
         )}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>No items in this category</Text>
-        }
+        ListEmptyComponent={<Text style={styles.emptyText}>No items in this category</Text>}
       />
 
       {/* Entire Menu Empty State */}
-      {menuItems.length === 0 && (
-        <Text style={styles.emptyText}>
-          No items have been added to the menu yet.
-        </Text>
+      {globalMenuItems.length === 0 && (
+        <Text style={styles.emptyText}>No items have been added to the menu yet.</Text>
       )}
     </View>
   );
