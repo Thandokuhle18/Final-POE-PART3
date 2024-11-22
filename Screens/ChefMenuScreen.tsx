@@ -1,61 +1,70 @@
-import { StyleSheet, Text, View, FlatList } from "react-native";
-import React, { useState } from "react";
+import { StyleSheet, Text, View, FlatList, Button, Alert } from "react-native";
+import React, { useState, useEffect } from "react";
 import DropDownPicker from "react-native-dropdown-picker";
 
-const ChefMenuScreen = () => {
-  const [open, setOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("starter");
+interface MenuItem {
+  id: string;
+  name: string;
+  category: string;
+  price: string;
+}
+
+const ChefMenuScreen = ({ navigation, route }: { navigation: any; route: any }) => {
+  const [open, setOpen] = useState<boolean>(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>("starter");
   const [items, setItems] = useState([
     { label: "Starter", value: "starter" },
     { label: "Main", value: "main" },
     { label: "Dessert", value: "dessert" },
     { label: "Refreshments", value: "refreshments" },
   ]);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
 
-  // Sample menu items
-  const menuItems = [
-    { id: "1", name: "Tomato Soup", category: "starter", price: "R5" },
-    { id: "2", name: "Caesar Salad", category: "starter", price: "R6" },
-    { id: "3", name: "Grilled Chicken", category: "main", price: "R12" },
-    { id: "4", name: "Steak", category: "main", price: "R15" },
-    { id: "5", name: "Tiramisu", category: "dessert", price: "R7" },
-    { id: "6", name: "Ice Cream", category: "dessert", price: "R5" },
-    {
-      id: "7",
-      name: "Strawberry Lemonade",
-      category: "refreshments",
-      price: "R17",
-    },
-    {
-      id: "8",
-      name: "Iced Matcha Green Tea",
-      category: "refreshments",
-      price: "R15",
-    },
-  ];
+  // Update menu items when navigating from EditMenuScreen
+  useEffect(() => {
+    if (route.params?.menuItems) {
+      setMenuItems(route.params.menuItems);
+    }
+  }, [route.params?.menuItems]);
 
-  // Utility function to calculate average price by category
-  const calculateAveragePrice = (category) => {
-    const categoryItems = menuItems.filter(
-      (item) => item.category === category
-    );
+  const calculateAveragePrice = (category: string) => {
+    const categoryItems = menuItems.filter((item) => item.category === category);
     if (categoryItems.length === 0) return 0;
 
-    const total = categoryItems.reduce(
-      (sum, item) => sum + parseFloat(item.price.replace("R", "")),
-      0
-    );
-    return (total / categoryItems.length).toFixed(2); // Round to 2 decimal places
+    const total = categoryItems.reduce((sum, item) => {
+      const price = parseFloat(item.price.replace("R", "")) || 0;
+      return sum + price;
+    }, 0);
+    return (total / categoryItems.length).toFixed(2);
   };
 
-  // Filter menu items based on selected category
-  const filteredMenuItems = menuItems.filter(
-    (item) => item.category === selectedCategory
-  );
+  const filteredMenuItems = menuItems.filter((item) => item.category === selectedCategory);
+
+  const handleRemoveItem = (id: string) => {
+    Alert.alert("Confirm Delete", "Are you sure you want to remove this item?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "OK",
+        onPress: () => {
+          setMenuItems((prevItems) => prevItems.filter((item) => item.id !== id));
+        },
+      },
+    ]);
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Menu</Text>
+      <Text style={styles.title}>Chef's Menu</Text>
+
+      {/* Back Button */}
+      <Button
+        title="Back"
+        onPress={() => navigation.goBack()}
+        color="#2196F3"
+      />
 
       {/* Dropdown Picker */}
       <DropDownPicker
@@ -69,11 +78,10 @@ const ChefMenuScreen = () => {
         dropDownContainerStyle={styles.dropdownContainer}
       />
 
-      {/* Average Price Display */}
+      {/* Average Price */}
       <View style={styles.averagePriceContainer}>
         <Text style={styles.averagePriceText}>
-          Average Price for {selectedCategory}: R
-          {calculateAveragePrice(selectedCategory)}
+          Average Price for {selectedCategory}: R{calculateAveragePrice(selectedCategory)}
         </Text>
       </View>
 
@@ -85,12 +93,20 @@ const ChefMenuScreen = () => {
           <View style={styles.menuItem}>
             <Text style={styles.menuItemText}>{item.name}</Text>
             <Text style={styles.menuItemPrice}>{item.price}</Text>
+            <Button title="Remove" onPress={() => handleRemoveItem(item.id)} color="red" />
           </View>
         )}
         ListEmptyComponent={
           <Text style={styles.emptyText}>No items in this category</Text>
         }
       />
+
+      {/* Entire Menu Empty State */}
+      {menuItems.length === 0 && (
+        <Text style={styles.emptyText}>
+          No items have been added to the menu yet.
+        </Text>
+      )}
     </View>
   );
 };
@@ -143,5 +159,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 16,
     color: "#777",
+    marginTop: 20,
   },
 });
+
