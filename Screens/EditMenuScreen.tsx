@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, TextInput, Button, Alert } from "react-native";
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, Image } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 
 interface MenuItem {
@@ -42,32 +42,6 @@ const EditMenuScreen = ({ navigation }: { navigation: any }) => {
     return true;
   };
 
-  // Function to display all menu items (using a for loop)
-  const displayMenuItems = () => {
-    console.log("Current Menu Items:");
-    for (let i = 0; i < globalMenu.menuItems.length; i++) {
-      console.log(globalMenu.menuItems[i]);
-    }
-  };
-
-  // Function to display menu items using a while loop
-  const displayMenuItemsWhile = () => {
-    console.log("Displaying Menu Items (while loop):");
-    let index = 0;
-    while (index < globalMenu.menuItems.length) {
-      console.log(globalMenu.menuItems[index]);
-      index++;
-    }
-  };
-
-  // Function to display menu item keys (using a for-in loop)
-  const displayMenuKeys = () => {
-    console.log("Keys of Menu Items:");
-    for (const key in globalMenu.menuItems[0] || {}) {
-      console.log(key);
-    }
-  };
-
   // Handle saving a new dish
   const handleSaveDish = () => {
     if (!validateInputs()) return;
@@ -83,11 +57,6 @@ const EditMenuScreen = ({ navigation }: { navigation: any }) => {
     // Add the new dish
     addDishToMenu(newDish);
 
-    // Display the menu using various loops
-    displayMenuItems();
-    displayMenuItemsWhile();
-    displayMenuKeys();
-
     // Navigate to ChefMenuScreen
     navigation.navigate("Chef", { menuItems: globalMenu.menuItems });
 
@@ -99,6 +68,12 @@ const EditMenuScreen = ({ navigation }: { navigation: any }) => {
 
   return (
     <View style={styles.container}>
+      {/* Logo Image */}
+      <Image
+        source={require('../assets/Logo_Fresh_Cafe-removebg-preview.png')} // Adjust the path as per your structure
+        style={styles.logo}
+      />
+
       <Text style={styles.title}>Edit Menu</Text>
 
       <TextInput
@@ -129,7 +104,11 @@ const EditMenuScreen = ({ navigation }: { navigation: any }) => {
         style={styles.dropdown}
         dropDownContainerStyle={styles.dropdownContainer}
       />
-      <Button title="Save Dish" onPress={handleSaveDish} />
+      
+      {/* Custom Styled Button */}
+      <TouchableOpacity style={styles.button} onPress={handleSaveDish}>
+        <Text style={styles.buttonText}>Save Dish</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -139,14 +118,21 @@ export default EditMenuScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#1A2622", // Background color for the entire page
     padding: 20,
+  },
+  logo: {
+    width: 150, // Width of the image
+    height: 150, // Height of the image
+    alignSelf: 'center', // Center the logo horizontally
+    marginBottom: 20, // Add margin to the bottom of the logo
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 20,
+    color: "#fff", // White text for the title
   },
   input: {
     borderWidth: 1,
@@ -154,13 +140,29 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
     borderRadius: 5,
+    color: "#fff", // White text for input fields
+    backgroundColor: "#333", // Darker input field background
   },
   dropdown: {
     marginBottom: 20,
     borderColor: "#ccc",
+    backgroundColor: "#fff",
   },
   dropdownContainer: {
     borderColor: "#ccc",
   },
+  button: {
+    backgroundColor: "#735D51", // Custom button color
+    borderRadius: 25, // Curved corners
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    alignItems: "center",
+    marginTop: 20, // Space between the button and inputs
+  },
+  buttonText: {
+    color: "#fff", // White text for the button
+    fontSize: 16,
+  },
 });
+
 

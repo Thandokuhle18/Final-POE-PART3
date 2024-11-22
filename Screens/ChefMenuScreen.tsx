@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, FlatList, Button, Alert } from "react-native";
+import { StyleSheet, Text, View, FlatList, Alert, TouchableOpacity, Image } from "react-native";
 import React, { useState, useEffect } from "react";
 import DropDownPicker from "react-native-dropdown-picker";
 
@@ -82,20 +82,37 @@ const ChefMenuScreen = ({ navigation, route }: { navigation: any; route: any }) 
 
   return (
     <View style={styles.container}>
+      {/* Logo Image */}
+      <Image
+        source={require('../assets/Logo_Fresh_Cafe-removebg-preview.png')} // Adjust the path as per your structure
+        style={styles.logo}
+      />
+
       <Text style={styles.title}>Chef's Menu</Text>
 
       {/* Back Button */}
-      <Button title="Back to First Screen" onPress={() => navigation.goBack()} />
+      <View style={styles.buttonWrapper}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.button}
+        >
+          <Text style={styles.buttonText}>Back to First Screen</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Edit Menu Button */}
-      <Button
-        title="Edit Menu"
-        onPress={() =>
-          navigation.navigate("EditMenu", {
-            menuItems,
-          })
-        }
-      />
+      <View style={styles.buttonWrapper}>
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate("EditMenu", {
+              menuItems,
+            })
+          }
+          style={styles.button}
+        >
+          <Text style={styles.buttonText}>Edit Menu</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Dropdown Picker */}
       <DropDownPicker
@@ -124,7 +141,12 @@ const ChefMenuScreen = ({ navigation, route }: { navigation: any; route: any }) 
           <View style={styles.menuItem}>
             <Text style={styles.menuItemText}>{item.name}</Text>
             <Text style={styles.menuItemPrice}>{item.price}</Text>
-            <Button title="Remove" onPress={() => handleRemoveItem(item.id)} color="red" />
+            <TouchableOpacity
+              onPress={() => handleRemoveItem(item.id)}
+              style={styles.removeButton}
+            >
+              <Text style={styles.removeButtonText}>Remove</Text>
+            </TouchableOpacity>
           </View>
         )}
         ListEmptyComponent={<Text style={styles.emptyText}>No items in this category</Text>}
@@ -143,18 +165,26 @@ export default ChefMenuScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#1A2622", // Background color of the page
     padding: 20,
+  },
+  logo: {
+    width: 150, // Width of the image
+    height: 150, // Height of the image
+    alignSelf: 'center', // Center the logo horizontally
+    marginBottom: 20, // Add margin to the bottom of the logo
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 20,
+    color: "#fff", // White text for the title
   },
   dropdown: {
     marginBottom: 20,
     borderColor: "#ccc",
+    backgroundColor: "#fff", // Set background for the dropdown
   },
   dropdownContainer: {
     borderColor: "#ccc",
@@ -166,7 +196,7 @@ const styles = StyleSheet.create({
   averagePriceText: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#555",
+    color: "#fff", // White text for average price
   },
   menuItem: {
     flexDirection: "row",
@@ -177,16 +207,42 @@ const styles = StyleSheet.create({
   },
   menuItemText: {
     fontSize: 16,
+    color: "#fff", // White text for menu items
   },
   menuItemPrice: {
     fontSize: 16,
     fontWeight: "bold",
+    color: "#fff", // White text for price
   },
   emptyText: {
     textAlign: "center",
     fontSize: 16,
-    color: "#777",
+    color: "#fff", // White text for empty state
     marginTop: 20,
   },
+  buttonWrapper: {
+    marginBottom: 15, // Adds space between buttons
+  },
+  button: {
+    backgroundColor: "#735D51", // Custom color for the button
+    borderRadius: 25, // Curved corners
+    paddingVertical: 10, // Vertical padding
+    paddingHorizontal: 20, // Horizontal padding
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff", // White text for button text
+    fontSize: 16,
+  },
+  removeButton: {
+    backgroundColor: "red",
+    borderRadius: 25,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  removeButtonText: {
+    color: "#fff", // White text for the remove button
+  },
 });
-
